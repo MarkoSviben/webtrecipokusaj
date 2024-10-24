@@ -1,0 +1,18 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Ticket {
+  id        String   @id @default(uuid())
+  vatin     String   @db.VarChar(11)
+  firstName String   @db.VarChar(100)
+  lastName  String   @db.VarChar(100)
+  createdAt DateTime @default(now())
+}
