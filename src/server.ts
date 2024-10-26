@@ -30,11 +30,11 @@ app.use(express.json());
 // Inicijalizacija session middleware-a
 app.use(
   session({
-    secret: 'YOUR_SESSION_SECRET', // Zamijenite ovo sigurnom vrijednošću
+    secret: process.env.SESSION_SECRET || 'YOUR_SESSION_SECRET', // Koristite environment varijablu
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 86400000, // Vrijeme trajanja kolačića u milisekundama (ovdje 1 dan)
+      maxAge: 86400000, // 1 dan
     },
   })
 );
@@ -49,7 +49,7 @@ const strategy = new Auth0Strategy(
     domain: process.env.AUTH0_DOMAIN!,
     clientID: process.env.AUTH0_CLIENT_ID!,
     clientSecret: process.env.AUTH0_CLIENT_SECRET!,
-    callbackURL: 'http://localhost:3000/callback',
+    callbackURL: `${process.env.BASE_URL}/callback`, // Dinamički URL
   },
   function (
     accessToken: string,
@@ -99,8 +99,8 @@ app.get('/logout', (req, res) => {
       console.error('Greška prilikom odjave:', err);
     }
     res.redirect(
-      `https://${process.env.AUTH0_DOMAIN}/v2/logout?client_id=${process.env.AUTH0_CLIENT_ID}&returnTo=http://localhost:3000`
-    );
+      `https://${process.env.AUTH0_DOMAIN}/v2/logout?client_id=${process.env.AUTH0_CLIENT_ID}&returnTo=${process.env.BASE_URL}`
+    ); // Dinamički URL
   });
 });
 
@@ -166,7 +166,7 @@ app.post('/create', authCheck, async (req, res) => {
     console.log('Kreirana nova ulaznica:', newTicket);
 
     // Generiranje URL-a za ulaznicu
-    const ticketUrl = `http://localhost:${PORT}/ticket/${newTicket.id}`;
+    const ticketUrl = `${process.env.BASE_URL}/ticket/${newTicket.id}`;
     console.log('Generirani URL za ulaznicu:', ticketUrl);
 
     // Generiranje QR koda
@@ -212,5 +212,5 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 // Pokretanje servera
 app.listen(PORT, () => {
-  console.log(`Server radi na http://localhost:${PORT}`);
+  console.log(`Server radi na ${process.env.BASE_URL}`);
 });

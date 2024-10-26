@@ -51,7 +51,7 @@ const strategy = new passport_auth0_1.Strategy({
     domain: process.env.AUTH0_DOMAIN,
     clientID: process.env.AUTH0_CLIENT_ID,
     clientSecret: process.env.AUTH0_CLIENT_SECRET,
-    callbackURL: 'http://localhost:3000/callback',
+    callbackURL: `${process.env.BASE_URL}/callback`, // Dinamički URL
 }, function (accessToken, refreshToken, extraParams, profile, done) {
     return done(null, profile);
 });
@@ -79,7 +79,7 @@ app.get('/logout', (req, res) => {
         if (err) {
             console.error('Greška prilikom odjave:', err);
         }
-        res.redirect(`https://${process.env.AUTH0_DOMAIN}/v2/logout?client_id=${process.env.AUTH0_CLIENT_ID}&returnTo=http://localhost:3000`);
+        res.redirect(`https://${process.env.AUTH0_DOMAIN}/v2/logout?client_id=${process.env.AUTH0_CLIENT_ID}&returnTo=${process.env.BASE_URL}`);
     });
 });
 // Početna ruta
