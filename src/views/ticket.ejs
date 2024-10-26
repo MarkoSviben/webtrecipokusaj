@@ -1,30 +1,29 @@
-<!-- src/views/ticket.ejs -->
-
 <!DOCTYPE html>
-<html lang="hr">
+<html>
 <head>
-  <!-- Vaš postojeći kod -->
+  <title>Informacije o ulaznici</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100">
-  <div class="container mx-auto p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold">Informacije o Ulaznici</h1>
-      <% if (user) { %>
-        <div>
-          <span class="text-gray-700">Prijavljeni korisnik: <%= user.displayName || user.nickname %></span>
-          <a href="/logout" class="ml-4 text-red-500 hover:underline">Odjava</a>
-        </div>
-      <% } else { %>
-        <a href="/login" class="text-blue-500 hover:underline">Prijava</a>
-      <% } %>
+<body>
+  <div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Detalji ulaznice</h1>
+      <a href="/" class="btn btn-secondary">Povratak</a>
     </div>
-    <div class="max-w-md mx-auto bg-white p-8 rounded shadow">
-      <!-- Prikaz informacija o ulaznici -->
-      <p><strong>Ime:</strong> <%= ticket.firstName %></p>
-      <p><strong>Prezime:</strong> <%= ticket.lastName %></p>
-      <p><strong>VATIN:</strong> <%= ticket.vatin %></p>
-      <p><strong>Vrijeme Kreiranja:</strong> <%= new Date(ticket.createdAt).toLocaleString() %></p>
+
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">ID: <%= ticket.id %></h5>
+        <p class="card-text"><strong>VAT broj:</strong> <%= ticket.vatin %></p>
+        <p class="card-text"><strong>Ime:</strong> <%= ticket.firstName %></p>
+        <p class="card-text"><strong>Prezime:</strong> <%= ticket.lastName %></p>
+        <p class="card-text"><strong>Korisnik:</strong> <%= user.displayName || user.nickname || user.email %></p>
+      </div>
     </div>
   </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -31,6 +31,9 @@ const PORT = process.env.PORT || 3000;
 // Postavljanje view enginea
 app.set('view engine', 'ejs');
 app.set('views', path_1.default.join(__dirname, 'views'));
+// Middleware za parsiranje tijela zahtjeva
+app.use(express_1.default.urlencoded({ extended: true }));
+app.use(express_1.default.json());
 // Inicijalizacija session middleware-a
 app.use((0, express_session_1.default)({
     secret: 'YOUR_SESSION_SECRET',
@@ -60,9 +63,6 @@ passport_1.default.serializeUser((user, done) => {
 passport_1.default.deserializeUser((user, done) => {
     done(null, user);
 });
-// Middleware za parsiranje tijela zahtjeva
-app.use(express_1.default.urlencoded({ extended: true }));
-app.use(express_1.default.json());
 // Ruta za pokretanje autentifikacije
 app.get('/login', passport_1.default.authenticate('auth0', {
     scope: 'openid profile email',
@@ -86,15 +86,15 @@ app.get('/logout', (req, res) => {
 app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const count = yield prisma.ticket.count();
-        res.render('index', { count });
+        res.render('index', { count, user: req.user });
     }
     catch (error) {
         console.error('Greška prilikom dohvaćanja broja ulaznica:', error);
         res.status(500).send('Internal Server Error');
     }
 }));
-// Ruta za kreiranje nove ulaznice s QR kodom
-app.post('/create', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Ruta za kreiranje nove ulaznice s QR kodom (ZAŠTIĆENA)
+app.post('/create', authCheck_1.authCheck, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { vatin, firstName, lastName } = req.body;
     // Validacija podataka
     if (!vatin || !firstName || !lastName) {
