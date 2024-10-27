@@ -12,25 +12,21 @@ import { authCheck } from './authCheck';
 
 dotenv.config();
 
-// Inicijalizacija Prisma klijenta
+
 const prisma = new PrismaClient();
 
-// Kreiranje Express aplikacije
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Postavljanje view enginea
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middleware za parsiranje tijela zahtjeva
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Inicijalizacija session middleware-a
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'YOUR_SESSION_SECRET', // Koristite environment varijablu
+    secret: process.env.SESSION_SECRET || 'YOUR_SESSION_SECRET', 
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -39,11 +35,9 @@ app.use(
   })
 );
 
-// Inicijalizacija Passport-a i sessiona
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Konfiguracija Passport Auth0 strategije
 const strategy = new Auth0Strategy(
   {
     domain: process.env.AUTH0_DOMAIN!,
@@ -64,7 +58,6 @@ const strategy = new Auth0Strategy(
 
 passport.use(strategy);
 
-// Serializacija i deserializacija korisnika
 passport.serializeUser((user, done) => {
   done(null, user);
 });
@@ -73,7 +66,6 @@ passport.deserializeUser((user: Express.User, done) => {
   done(null, user);
 });
 
-// Ruta za pokretanje autentifikacije
 app.get(
   '/login',
   passport.authenticate('auth0', {
@@ -81,7 +73,6 @@ app.get(
   })
 );
 
-// Ruta za povratni poziv nakon autentifikacije
 app.get(
   '/callback',
   passport.authenticate('auth0', {
@@ -92,7 +83,6 @@ app.get(
   }
 );
 
-// Ruta za odjavu
 app.get('/logout', (req, res) => {
   req.logout((err) => {
     if (err) {
@@ -100,11 +90,10 @@ app.get('/logout', (req, res) => {
     }
     res.redirect(
       `https://${process.env.AUTH0_DOMAIN}/v2/logout?client_id=${process.env.AUTH0_CLIENT_ID}&returnTo=${process.env.BASE_URL}`
-    ); // Dinamički URL
+    ); 
   });
 });
 
-// Početna ruta
 app.get('/', async (req, res) => {
   try {
     const count = await prisma.ticket.count();
@@ -115,17 +104,14 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Ruta za kreiranje nove ulaznice s QR kodom (ZAŠTIĆENA)
 app.post('/create', authCheck, async (req, res) => {
   const { vatin, firstName, lastName } = req.body;
 
-  // Validacija podataka
   if (!vatin || !firstName || !lastName) {
     res.status(400).send('Sva polja su obavezna.');
     return;
   }
 
-  // Provjera dužine unosa
   if (vatin.length > 11) {
     res.status(400).send('VATIN ne smije biti duži od 11 znakova.');
     return;
@@ -144,7 +130,6 @@ app.post('/create', authCheck, async (req, res) => {
   console.log('Kreiranje ulaznice s podacima:', { vatin, firstName, lastName });
 
   try {
-    // Provjera broja ulaznica za dati VATIN
     const existingTickets = await prisma.ticket.count({
       where: { vatin },
     });
@@ -154,7 +139,6 @@ app.post('/create', authCheck, async (req, res) => {
       return;
     }
 
-    // Kreiranje nove ulaznice
     const newTicket = await prisma.ticket.create({
       data: {
         vatin,
@@ -165,15 +149,12 @@ app.post('/create', authCheck, async (req, res) => {
 
     console.log('Kreirana nova ulaznica:', newTicket);
 
-    // Generiranje URL-a za ulaznicu
     const ticketUrl = `${process.env.BASE_URL}/ticket/${newTicket.id}`;
     console.log('Generirani URL za ulaznicu:', ticketUrl);
 
-    // Generiranje QR koda
     const qrCodeDataUrl = await QRCode.toDataURL(ticketUrl);
     console.log('Generirani QR Code Data URL:', qrCodeDataUrl);
 
-    // Renderiranje stranice s QR kodom
     res.render('qr', { qrCodeDataUrl, ticketUrl });
   } catch (error: any) {
     console.error('Greška prilikom kreiranja ulaznice:', error);
@@ -181,12 +162,10 @@ app.post('/create', authCheck, async (req, res) => {
   }
 });
 
-// Ruta za prikaz informacija o ulaznici pomoću identifikatora (ZAŠTIĆENA)
 app.get('/ticket/:id', authCheck, async (req, res) => {
   const { id } = req.params;
 
   try {
-    // Dohvaćanje ulaznice na temelju ID-a
     const ticket = await prisma.ticket.findUnique({
       where: { id },
     });
@@ -196,7 +175,6 @@ app.get('/ticket/:id', authCheck, async (req, res) => {
       return;
     }
 
-    // Renderiranje stranice s informacijama o ulaznici
     res.render('ticket', { ticket, user: req.user });
   } catch (error) {
     console.error('Greška prilikom dohvaćanja ulaznice:', error);
@@ -204,13 +182,11 @@ app.get('/ticket/:id', authCheck, async (req, res) => {
   }
 });
 
-// Globalni error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Global Error Handler:', err);
   res.status(500).send('Internal Server Error');
 });
 
-// Pokretanje servera
 app.listen(PORT, () => {
   console.log(`Server radi na ${process.env.BASE_URL}`);
 });
