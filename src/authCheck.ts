@@ -13,6 +13,6 @@ export const authCheck = (req: Request, res: Response, next: NextFunction) => {
     return next();
   }
 
-  req.session.returnTo = req.originalUrl; // Ovdje TypeScript treba prepoznati 'returnTo'
+  req.session.returnTo = req.originalUrl; 
   res.redirect('/login');
 };
