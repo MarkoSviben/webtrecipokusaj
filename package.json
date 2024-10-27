@@ -9,7 +9,7 @@
     "dev": "ts-node src/server.ts",
     "prisma": "prisma"
   },
-  "author": "Vaše Ime",
+  "author": "Marko",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^4.0.0",
