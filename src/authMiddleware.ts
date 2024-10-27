@@ -10,7 +10,7 @@ const authMiddleware = expressjwt({
   secret: jwksRsa.expressJwtSecret({
     cache: true,
     rateLimit: true,
-    jwksRequestsPerMinute: 5, // Opcionalno, ali korisno za rate limiting
+    jwksRequestsPerMinute: 5, 
     jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
   }) as GetVerificationKey,
   audience: process.env.AUTH0_AUDIENCE,
